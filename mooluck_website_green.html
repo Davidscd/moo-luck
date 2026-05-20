@@ -1,167 +1,216 @@
+export default function MooLuckDashboard() {
+  const stats = [
+    { title: 'Animales registrados', value: '128', icon: '🐄' },
+    { title: 'Producción diaria', value: '560 L', icon: '🥛' },
+    { title: 'Vacunas pendientes', value: '12', icon: '💉' },
+    { title: 'Gastos del mes', value: '$3.200.000', icon: '💰' },
+  ];
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MOO LUCK - Gestión Ganadera Inteligente</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #e8f5e9; /* Verde claro */
-      color: #2e7d32;
-    }
+  const animals = [
+    { id: '001', name: 'Luna', breed: 'Holstein', status: 'Saludable' },
+    { id: '002', name: 'Canela', breed: 'Jersey', status: 'En observación' },
+    { id: '003', name: 'Estrella', breed: 'Normando', status: 'Vacunada' },
+  ];
 
-    header {
-      background: linear-gradient(135deg, #a5d6a7, #66bb6a); /* Verde claro degradado */
-      color: white;
-      padding: 80px 20px 40px;
-      position: relative;
-      text-align: center;
-    }
+  const milkProduction = [
+    { date: '20/05/2026', animal: 'Luna', liters: '24 L' },
+    { date: '20/05/2026', animal: 'Canela', liters: '18 L' },
+    { date: '20/05/2026', animal: 'Estrella', liters: '21 L' },
+  ];
 
-    .logo-top {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      width: 120px;
-      height: auto;
-      border-radius: 10px;
-      box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
-    }
+  const events = [
+    { animal: 'Luna', event: 'Vacunación', date: '18/05/2026' },
+    { animal: 'Canela', event: 'Control médico', date: '19/05/2026' },
+    { animal: 'Estrella', event: 'Parto programado', date: '22/05/2026' },
+  ];
 
-    header h1 {
-      font-size: 2.5em;
-      margin: 0;
-      color: white;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-    }
+  const finances = [
+    { type: 'Ingreso', description: 'Venta de leche', amount: '$1.200.000' },
+    { type: 'Gasto', description: 'Compra de alimento', amount: '$450.000' },
+    { type: 'Gasto', description: 'Medicamentos', amount: '$180.000' },
+  ];
 
-    .container {
-      max-width: 1100px;
-      margin: -30px auto 0;
-      padding: 30px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
-    }
+  return (
+    <div className="min-h-screen bg-[#edf6ee] text-gray-800 flex">
+      {/* Sidebar */}
+      <aside className="w-72 bg-[#2f5d50] text-white p-6 hidden md:flex flex-col">
+        <div>
+          <h1 className="text-3xl font-bold">🐄 MOO LUCK</h1>
+          <p className="text-sm mt-2 text-gray-200">
+            Sistema de Gestión Ganadera
+          </p>
+        </div>
 
-    h2 {
-      color: #2e7d32;
-      margin-top: 30px;
-    }
+        <nav className="mt-10 flex flex-col gap-4 text-lg">
+          <button className="text-left hover:bg-[#3d8361] p-3 rounded-xl transition">
+            📊 Dashboard
+          </button>
+          <button className="text-left hover:bg-[#3d8361] p-3 rounded-xl transition">
+            🐄 Ganado
+          </button>
+          <button className="text-left hover:bg-[#3d8361] p-3 rounded-xl transition">
+            🥛 Producción
+          </button>
+          <button className="text-left hover:bg-[#3d8361] p-3 rounded-xl transition">
+            💉 Salud
+          </button>
+          <button className="text-left hover:bg-[#3d8361] p-3 rounded-xl transition">
+            💰 Finanzas
+          </button>
+          <button className="text-left hover:bg-[#3d8361] p-3 rounded-xl transition">
+            📦 Inventario
+          </button>
+        </nav>
+      </aside>
 
-    .section {
-      background: #f1f8e9;
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 20px;
-      transition: transform 0.3s ease;
-    }
+      {/* Main content */}
+      <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h2 className="text-4xl font-bold text-[#2f5d50]">
+              Dashboard Ganadero
+            </h2>
+            <p className="text-gray-600 mt-2">
+              Controla la producción, salud y finanzas de tu ganado.
+            </p>
+          </div>
 
-    .section:hover {
-      transform: scale(1.02);
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    }
+          <button className="bg-[#3d8361] hover:bg-[#2f5d50] text-white px-5 py-3 rounded-2xl shadow transition">
+            + Registrar animal
+          </button>
+        </div>
 
-    ul {
-      padding-left: 20px;
-    }
+        {/* Stats */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mt-10">
+          {stats.map((stat, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-3xl shadow-md p-6 hover:shadow-xl transition"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-500 text-sm">{stat.title}</p>
+                  <h3 className="text-3xl font-bold mt-2">{stat.value}</h3>
+                </div>
+                <span className="text-4xl">{stat.icon}</span>
+              </div>
+            </div>
+          ))}
+        </section>
 
-    .button {
-      display: inline-block;
-      background-color: #388e3c;
-      color: white;
-      padding: 12px 25px;
-      text-decoration: none;
-      font-size: 1.1em;
-      border-radius: 5px;
-      margin: 15px 10px 0 0;
-      transition: background 0.3s;
-    }
+        {/* Animals Table */}
+        <section className="mt-12 bg-white rounded-3xl shadow-md p-6 overflow-x-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-[#2f5d50]">
+              Gestión de Ganado
+            </h3>
+            <button className="bg-[#3d8361] text-white px-4 py-2 rounded-xl hover:bg-[#2f5d50] transition">
+              Ver todos
+            </button>
+          </div>
 
-    .button:hover {
-      background-color: #2e7d32;
-    }
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b">
+                <th className="p-3">ID</th>
+                <th className="p-3">Nombre</th>
+                <th className="p-3">Raza</th>
+                <th className="p-3">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {animals.map((animal, index) => (
+                <tr key={index} className="border-b hover:bg-gray-50">
+                  <td className="p-3">{animal.id}</td>
+                  <td className="p-3">{animal.name}</td>
+                  <td className="p-3">{animal.breed}</td>
+                  <td className="p-3">{animal.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
 
-    .footer {
-      background-color: #2e7d32;
-      color: white;
-      text-align: center;
-      padding: 15px;
-      margin-top: 40px;
-      border-top: 4px solid #81c784;
-    }
+        {/* Production */}
+        <section className="mt-12 bg-white rounded-3xl shadow-md p-6 overflow-x-auto">
+          <h3 className="text-2xl font-bold text-[#2f5d50] mb-6">
+            Producción Lechera
+          </h3>
 
-    p {
-      margin-bottom: 10px;
-    }
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b">
+                <th className="p-3">Fecha</th>
+                <th className="p-3">Animal</th>
+                <th className="p-3">Litros</th>
+              </tr>
+            </thead>
+            <tbody>
+              {milkProduction.map((item, index) => (
+                <tr key={index} className="border-b hover:bg-gray-50">
+                  <td className="p-3">{item.date}</td>
+                  <td className="p-3">{item.animal}</td>
+                  <td className="p-3">{item.liters}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
 
-    .buttons-center {
-      text-align: center;
-      margin-top: 30px;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <img src="logo_mooluck.jpeg" alt="Logo de MOO LUCK" class="logo-top">
-    <h1>MOO LUCK - Gestión Ganadera Inteligente</h1>
-  </header>
+        {/* Events and finances */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-12">
+          <section className="bg-white rounded-3xl shadow-md p-6 overflow-x-auto">
+            <h3 className="text-2xl font-bold text-[#2f5d50] mb-6">
+              Eventos Sanitarios
+            </h3>
 
-  <div class="container">
-    <h2>¿Qué es MOO LUCK?</h2>
-    <div class="section">
-      <p>MOO LUCK es una innovadora aplicación diseñada para optimizar la gestión ganadera mediante tecnología inteligente. Proporciona herramientas clave para monitorear, analizar y mejorar la productividad del ganado.</p>
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b">
+                  <th className="p-3">Animal</th>
+                  <th className="p-3">Evento</th>
+                  <th className="p-3">Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                {events.map((event, index) => (
+                  <tr key={index} className="border-b hover:bg-gray-50">
+                    <td className="p-3">{event.animal}</td>
+                    <td className="p-3">{event.event}</td>
+                    <td className="p-3">{event.date}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+
+          <section className="bg-white rounded-3xl shadow-md p-6 overflow-x-auto">
+            <h3 className="text-2xl font-bold text-[#2f5d50] mb-6">
+              Finanzas
+            </h3>
+
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b">
+                  <th className="p-3">Tipo</th>
+                  <th className="p-3">Descripción</th>
+                  <th className="p-3">Monto</th>
+                </tr>
+              </thead>
+              <tbody>
+                {finances.map((finance, index) => (
+                  <tr key={index} className="border-b hover:bg-gray-50">
+                    <td className="p-3">{finance.type}</td>
+                    <td className="p-3">{finance.description}</td>
+                    <td className="p-3">{finance.amount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        </div>
+      </main>
     </div>
-
-    <h2>Características Principales</h2>
-    <div class="section">
-      <ul>
-        <li><strong>Registro de Ganado:</strong> Historial de salud, producción y genética por ejemplar.</li>
-        <li><strong>Control Sanitario:</strong> Seguimiento de vacunas, enfermedades y tratamientos.</li>
-        <li><strong>Monitoreo de Producción:</strong> Control de leche, carne y peso.</li>
-        <li><strong>Alertas Inteligentes:</strong> Notificaciones de partos, vacunaciones y anomalías.</li>
-        <li><strong>Reportes y Estadísticas:</strong> Análisis visual con gráficos interactivos.</li>
-        <li><strong>Gestión Financiera:</strong> Registro de ingresos, gastos y rentabilidad.</li>
-      </ul>
-    </div>
-
-    <h2>Beneficios para los Ganaderos</h2>
-    <div class="section">
-      <p>Con MOO LUCK puedes aumentar la eficiencia, reducir costos y tomar decisiones informadas gracias a datos precisos. Una herramienta clave para la ganadería moderna.</p>
-    </div>
-
-    <h2>Detalles Técnicos</h2>
-    <div class="section">
-      <p>La app es compatible con múltiples dispositivos y tiene una interfaz amigable. Permite trabajar sin conexión y sincroniza los datos al estar online.</p>
-    </div>
-
-    <h2>Preguntas Frecuentes</h2>
-    <div class="section">
-      <p><strong>¿Qué dispositivos son compatibles?</strong> Windows, Android y iOS.</p>
-      <p><strong>¿Necesita internet?</strong> No, puede usarse offline y sincroniza luego.</p>
-      <p><strong>¿Puedo exportar datos?</strong> Sí, en formatos como Excel y PDF.</p>
-    </div>
-
-    <div class="buttons-center">
-      <a href="#" class="button">Descargar App</a>
-      <a href="#" class="button">Solicitar Demo</a>
-      <a href="#" class="button">Más Información</a>
-    </div>
-
-    <h2>Contacto</h2>
-    <div class="section">
-      <p>📩 Email: contacto@mooluck.com</p>
-      <p>📞 Teléfono: +34 600 000 000</p>
-      <p>🌍 Sitio Web: www.mooluck.com</p>
-    </div>
-  </div>
-
-  <div class="footer">
-    <p>&copy; 2024 MOO LUCK - Proyecto de Gestión Ganadera</p>
-  </div>
-</body>
-</html>
+  );
+}
