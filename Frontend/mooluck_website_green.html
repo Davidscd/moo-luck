@@ -41,6 +41,86 @@
     button { cursor: pointer; }
     button:disabled { cursor: wait; opacity: 0.7; }
 
+    .auth-shell {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        linear-gradient(135deg, rgba(31, 78, 61, 0.93), rgba(47, 111, 83, 0.78)),
+        url("logo_mooluck.jpeg");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .auth-card {
+      width: min(960px, 100%);
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(320px, 0.7fr);
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.42);
+      border-radius: 10px;
+      box-shadow: 0 24px 60px rgba(18, 29, 25, 0.25);
+      overflow: hidden;
+    }
+
+    .auth-intro {
+      padding: 34px;
+      background: linear-gradient(180deg, rgba(248, 250, 245, 0.95), rgba(238, 247, 239, 0.95));
+      display: grid;
+      align-content: space-between;
+      gap: 28px;
+    }
+
+    .auth-intro h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3rem);
+      letter-spacing: 0;
+    }
+
+    .auth-intro p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.55;
+    }
+
+    .auth-form {
+      padding: 34px;
+      display: grid;
+      gap: 14px;
+      align-content: center;
+    }
+
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .auth-tabs button {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-soft);
+      min-height: 40px;
+      color: var(--ink);
+    }
+
+    .auth-tabs button.active {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand);
+    }
+
+    .auth-only-register { display: none; }
+    .auth-form.register-mode .auth-only-register { display: grid; }
+    .auth-form.register-mode .login-label { display: none; }
+    .auth-form:not(.register-mode) .register-label { display: none; }
+
+    .hidden {
+      display: none !important;
+    }
+
     .shell {
       min-height: 100vh;
       display: grid;
@@ -524,6 +604,15 @@
     }
 
     @media (max-width: 760px) {
+      .auth-card {
+        grid-template-columns: 1fr;
+      }
+
+      .auth-intro,
+      .auth-form {
+        padding: 24px;
+      }
+
       .shell { grid-template-columns: 1fr; }
 
       .sidebar {
@@ -558,13 +647,55 @@
   </style>
 </head>
 <body>
-  <div class="shell">
+  <section class="auth-shell" id="authShell">
+    <div class="auth-card">
+      <div class="auth-intro">
+        <div>
+          <h1>Moo Luck</h1>
+          <p>Tu cuenta personal para organizar fincas, animales, produccion, salud y finanzas desde cualquier equipo del equipo de trabajo.</p>
+        </div>
+        <div class="metric-grid">
+          <article class="metric">
+            <span>Enfoque</span>
+            <strong>Ganadero</strong>
+          </article>
+          <article class="metric">
+            <span>Datos</span>
+            <strong>Por propietario</strong>
+          </article>
+        </div>
+      </div>
+      <form class="auth-form" id="authForm">
+        <div class="auth-tabs">
+          <button class="active" type="button" id="loginTab">Entrar</button>
+          <button type="button" id="registerTab">Crear cuenta</button>
+        </div>
+        <div class="field auth-only-register">
+          <label for="authName">Nombre</label>
+          <input id="authName" name="nombre" autocomplete="name" placeholder="Nombre del productor">
+        </div>
+        <div class="field">
+          <label for="authEmail">Email</label>
+          <input id="authEmail" name="email" type="email" autocomplete="email" required placeholder="productor@finca.com">
+        </div>
+        <div class="field">
+          <label for="authPassword">Password</label>
+          <input id="authPassword" name="password" type="password" autocomplete="current-password" required minlength="8">
+        </div>
+        <button class="primary login-label" type="submit">Iniciar sesion</button>
+        <button class="primary register-label" type="submit">Crear cuenta de productor</button>
+        <div class="message" id="authMessage"></div>
+      </form>
+    </div>
+  </section>
+
+  <div class="shell hidden" id="appShell">
     <aside class="sidebar">
       <div class="brand">
         <img src="logo_mooluck.jpeg" alt="Moo Luck">
         <div>
           <h1>Moo Luck</h1>
-          <span>Operacion ganadera</span>
+          <span id="userLabel">Operacion ganadera</span>
         </div>
       </div>
       <nav class="nav" aria-label="Secciones">
@@ -576,6 +707,7 @@
       </nav>
       <div class="sidebar-note">
         Alertas calculadas con produccion, salud y finanzas para priorizar el trabajo diario.
+        <button class="ghost" type="button" id="logoutButton" style="width:100%; margin-top:12px;">Cerrar sesion</button>
       </div>
     </aside>
 
@@ -675,6 +807,33 @@
                 <h3>Fincas</h3>
               </header>
               <div class="list" id="dashboardFarmsList"></div>
+            </section>
+            <section class="panel">
+              <header>
+                <h3>Agregar finca</h3>
+              </header>
+              <form class="form-grid" id="farmForm">
+                <div class="field">
+                  <label for="farmName">Nombre</label>
+                  <input id="farmName" name="nombre" required placeholder="Finca La Esperanza">
+                </div>
+                <div class="field">
+                  <label for="farmTown">Municipio</label>
+                  <input id="farmTown" name="municipio" placeholder="Tunja">
+                </div>
+                <div class="field">
+                  <label for="farmDepartment">Departamento</label>
+                  <input id="farmDepartment" name="departamento" placeholder="Boyaca">
+                </div>
+                <div class="field">
+                  <label for="farmArea">Hectareas</label>
+                  <input id="farmArea" name="hectareas" type="number" step="0.01" min="0">
+                </div>
+                <div class="form-actions">
+                  <button class="primary" type="submit">Guardar finca</button>
+                </div>
+              </form>
+              <div class="message" id="farmMessage"></div>
             </section>
           </div>
         </div>
@@ -961,7 +1120,7 @@
     </main>
   </div>
 
-  <nav class="bottom-nav" aria-label="Navegacion movil">
+  <nav class="bottom-nav hidden" aria-label="Navegacion movil">
     <button class="active" type="button" data-module="dashboard">Inicio</button>
     <button type="button" data-module="ganado">Ganado</button>
     <button type="button" data-module="produccion">Leche</button>
@@ -1007,6 +1166,7 @@
     const state = {
       apiBase: savedApiBase.replace(/\/$/, ''),
       module: 'dashboard',
+      currentUser: JSON.parse(localStorage.getItem('mooLuckUser') || 'null'),
       animals: [],
       farms: [],
       productions: [],
@@ -1024,6 +1184,21 @@
       salud: ['Salud', 'Eventos sanitarios, tratamientos y proximas fechas.'],
       finanzas: ['Finanzas', 'Ingresos, egresos, categorias y balance.'],
     };
+
+    function showAuthenticatedApp() {
+      document.getElementById('authShell').classList.add('hidden');
+      document.getElementById('appShell').classList.remove('hidden');
+      document.querySelector('.bottom-nav').classList.remove('hidden');
+      document.getElementById('userLabel').textContent = state.currentUser
+        ? `${state.currentUser.nombre} / ${state.currentUser.rol}`
+        : 'Operacion ganadera';
+    }
+
+    function showAuthScreen() {
+      document.getElementById('authShell').classList.remove('hidden');
+      document.getElementById('appShell').classList.add('hidden');
+      document.querySelector('.bottom-nav').classList.add('hidden');
+    }
 
     function endpoint(path) {
       return `${state.apiBase}/api/v1/${path}`;
@@ -1076,6 +1251,14 @@
       return data;
     }
 
+    function payloadWithOwner(form) {
+      const data = compactPayload(form);
+      if (state.currentUser) {
+        data.propietario_id = state.currentUser.id;
+      }
+      return data;
+    }
+
     async function requestJson(path, options = {}) {
       const response = await fetch(endpoint(path), {
         headers: {
@@ -1095,6 +1278,34 @@
       }
       if (response.status === 204) return null;
       return response.json();
+    }
+
+    async function authenticate(mode, form) {
+      const data = compactPayload(form);
+      if (mode === 'register' && !data.nombre) {
+        throw new Error('El nombre es requerido para crear la cuenta.');
+      }
+      const payload = mode === 'register'
+        ? {
+            nombre: data.nombre,
+            email: data.email,
+            password: data.password,
+            rol: 'propietario',
+          }
+        : {
+            email: data.email,
+            password: data.password,
+          };
+
+      const user = await requestJson(mode === 'register' ? 'usuarios/' : 'usuarios/login/', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+
+      state.currentUser = user;
+      localStorage.setItem('mooLuckUser', JSON.stringify(user));
+      showAuthenticatedApp();
+      await loadData();
     }
 
     function setStatus(kind, message) {
@@ -1411,11 +1622,16 @@
     }
 
     async function loadData() {
+      if (!state.currentUser) {
+        showAuthScreen();
+        return;
+      }
+
       setStatus('', 'Conectando...');
       try {
         const [animals, farms, productions, events, categories, transactions, balance] = await Promise.all([
           requestJson('animales/'),
-          requestJson('fincas/'),
+          requestJson(`fincas/?propietario=${state.currentUser.id}`),
           requestJson('producciones/'),
           requestJson('eventos-sanitarios/'),
           requestJson('finanzas/categorias/'),
@@ -1423,13 +1639,23 @@
           requestJson('finanzas/transacciones/balance/'),
         ]);
 
-        state.animals = normalizeList(animals);
         state.farms = normalizeList(farms);
-        state.productions = normalizeList(productions);
-        state.events = normalizeList(events);
+        const farmIds = new Set(state.farms.map((farm) => farm.id));
+        state.animals = normalizeList(animals).filter((animal) => farmIds.has(animal.finca));
+        const animalIds = new Set(state.animals.map((animal) => animal.id));
+        state.productions = normalizeList(productions).filter((item) => animalIds.has(item.animal));
+        state.events = normalizeList(events).filter((item) => animalIds.has(item.animal));
         state.categories = normalizeList(categories);
-        state.transactions = normalizeList(transactions);
-        state.balance = balance;
+        state.transactions = normalizeList(transactions).filter((item) => farmIds.has(item.finca));
+        state.balance = {
+          total_ingresos: state.transactions
+            .filter((item) => item.tipo === 'ingreso')
+            .reduce((sum, item) => sum + Number(item.monto || 0), 0),
+          total_egresos: state.transactions
+            .filter((item) => item.tipo === 'egreso')
+            .reduce((sum, item) => sum + Number(item.monto || 0), 0),
+        };
+        state.balance.balance_neto = state.balance.total_ingresos - state.balance.total_egresos;
 
         renderAll();
         setStatus('ok', 'API conectada');
@@ -1442,7 +1668,7 @@
       }
     }
 
-    async function handleForm(formId, path, messageId, successMessage) {
+    async function handleForm(formId, path, messageId, successMessage, payloadFn = compactPayload) {
       const form = document.getElementById(formId);
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -1452,7 +1678,7 @@
         try {
           await requestJson(path, {
             method: 'POST',
-            body: JSON.stringify(compactPayload(form)),
+            body: JSON.stringify(payloadFn(form)),
           });
           form.reset();
           setDefaultDates();
@@ -1530,14 +1756,56 @@
 
     document.getElementById('refreshAll').addEventListener('click', loadData);
 
+    document.getElementById('loginTab').addEventListener('click', () => {
+      document.getElementById('authForm').classList.remove('register-mode');
+      document.getElementById('loginTab').classList.add('active');
+      document.getElementById('registerTab').classList.remove('active');
+      document.getElementById('authPassword').autocomplete = 'current-password';
+      setMessage('authMessage', '');
+    });
+
+    document.getElementById('registerTab').addEventListener('click', () => {
+      document.getElementById('authForm').classList.add('register-mode');
+      document.getElementById('registerTab').classList.add('active');
+      document.getElementById('loginTab').classList.remove('active');
+      document.getElementById('authPassword').autocomplete = 'new-password';
+      setMessage('authMessage', '');
+    });
+
+    document.getElementById('authForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const mode = form.classList.contains('register-mode') ? 'register' : 'login';
+      setMessage('authMessage', mode === 'register' ? 'Creando cuenta...' : 'Iniciando sesion...');
+      try {
+        await authenticate(mode, form);
+        form.reset();
+        setMessage('authMessage', '');
+      } catch (error) {
+        setMessage('authMessage', error.message, 'error');
+      }
+    });
+
+    document.getElementById('logoutButton').addEventListener('click', () => {
+      state.currentUser = null;
+      localStorage.removeItem('mooLuckUser');
+      showAuthScreen();
+    });
+
     handleForm('animalForm', 'animales/', 'animalMessage', 'Animal guardado.');
+    handleForm('farmForm', 'fincas/', 'farmMessage', 'Finca guardada.', payloadWithOwner);
     handleForm('productionForm', 'producciones/', 'productionMessage', 'Produccion guardada.');
     handleForm('healthForm', 'eventos-sanitarios/', 'healthMessage', 'Evento guardado.');
     handleForm('financeForm', 'finanzas/transacciones/', 'financeMessage', 'Transaccion guardada.');
     handleForm('categoryForm', 'finanzas/categorias/', 'categoryMessage', 'Categoria guardada.');
 
     setDefaultDates();
-    loadData();
+    if (state.currentUser) {
+      showAuthenticatedApp();
+      loadData();
+    } else {
+      showAuthScreen();
+    }
   </script>
 </body>
 </html>

@@ -5,6 +5,19 @@ Moo Luck es un prototipo de gestion ganadera con:
 - Frontend estatico en `Frontend/mooluck_website_green.html`.
 - Backend Django REST Framework en `Backend/`.
 - Base de datos PostgreSQL en Neon mediante `Backend/.env`.
+- Cuentas personales de productores/gestores para administrar sus propias fincas.
+
+## Modelo de uso
+
+El flujo esperado es:
+
+1. El productor crea una cuenta o inicia sesion.
+2. Agrega una o varias fincas propias.
+3. Registra manualmente el ganado de cada finca.
+4. Registra produccion, eventos sanitarios y movimientos financieros.
+5. El dashboard calcula alertas y resumen operativo con los datos de esa cuenta.
+
+En esta fase el frontend guarda la sesion en `localStorage` y el backend expone un login simple en `/api/v1/usuarios/login/`. Para produccion real se debe reemplazar por autenticacion robusta con tokens, permisos y hash de password mas fuerte.
 
 ## Ejecutar localmente
 
@@ -75,3 +88,13 @@ Para usar GitHub Pages de forma real necesitas:
 - Configurar el campo "Conexion API" del frontend con la URL publica del backend.
 
 No es seguro conectar Neon directamente desde el navegador porque expondria credenciales de base de datos.
+
+## Proximo paso recomendado
+
+Para trabajo colaborativo y acceso desde cualquier dispositivo:
+
+1. Desplegar Django en Render/Railway/Fly.io.
+2. Configurar variables de entorno del backend en ese servicio.
+3. Agregar la URL del frontend de GitHub Pages a `CORS_ALLOWED_ORIGINS`.
+4. Publicar el frontend en GitHub Pages.
+5. Usar la URL HTTPS del backend en el campo "Conexion API".
