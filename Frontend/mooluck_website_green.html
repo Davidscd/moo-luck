@@ -1,216 +1,545 @@
-export default function MooLuckDashboard() {
-  const stats = [
-    { title: 'Animales registrados', value: '128', icon: '🐄' },
-    { title: 'Producción diaria', value: '560 L', icon: '🥛' },
-    { title: 'Vacunas pendientes', value: '12', icon: '💉' },
-    { title: 'Gastos del mes', value: '$3.200.000', icon: '💰' },
-  ];
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moo Luck</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7f2;
+      --panel: #ffffff;
+      --ink: #21342e;
+      --muted: #64736d;
+      --line: #dce6df;
+      --brand: #2f6f53;
+      --brand-strong: #214d3c;
+      --accent: #c89b3c;
+      --danger: #b54c4c;
+      --shadow: 0 16px 40px rgba(33, 52, 46, 0.1);
+    }
 
-  const animals = [
-    { id: '001', name: 'Luna', breed: 'Holstein', status: 'Saludable' },
-    { id: '002', name: 'Canela', breed: 'Jersey', status: 'En observación' },
-    { id: '003', name: 'Estrella', breed: 'Normando', status: 'Vacunada' },
-  ];
+    * {
+      box-sizing: border-box;
+    }
 
-  const milkProduction = [
-    { date: '20/05/2026', animal: 'Luna', liters: '24 L' },
-    { date: '20/05/2026', animal: 'Canela', liters: '18 L' },
-    { date: '20/05/2026', animal: 'Estrella', liters: '21 L' },
-  ];
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-  const events = [
-    { animal: 'Luna', event: 'Vacunación', date: '18/05/2026' },
-    { animal: 'Canela', event: 'Control médico', date: '19/05/2026' },
-    { animal: 'Estrella', event: 'Parto programado', date: '22/05/2026' },
-  ];
+    button, input {
+      font: inherit;
+    }
 
-  const finances = [
-    { type: 'Ingreso', description: 'Venta de leche', amount: '$1.200.000' },
-    { type: 'Gasto', description: 'Compra de alimento', amount: '$450.000' },
-    { type: 'Gasto', description: 'Medicamentos', amount: '$180.000' },
-  ];
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+    }
 
-  return (
-    <div className="min-h-screen bg-[#edf6ee] text-gray-800 flex">
-      {/* Sidebar */}
-      <aside className="w-72 bg-[#2f5d50] text-white p-6 hidden md:flex flex-col">
-        <div>
-          <h1 className="text-3xl font-bold">🐄 MOO LUCK</h1>
-          <p className="text-sm mt-2 text-gray-200">
-            Sistema de Gestión Ganadera.
-          </p>
+    .sidebar {
+      background: var(--brand-strong);
+      color: #fff;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand img {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #fff;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.45rem;
+      letter-spacing: 0;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button {
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #eef8f2;
+      text-align: left;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+
+    .nav button.active,
+    .nav button:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .main {
+      min-width: 0;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .title h2 {
+      margin: 0;
+      font-size: clamp(1.6rem, 4vw, 2.25rem);
+      letter-spacing: 0;
+    }
+
+    .title p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--muted);
+      box-shadow: 0 8px 20px rgba(33, 52, 46, 0.06);
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .dot.ok {
+      background: var(--brand);
+    }
+
+    .dot.fail {
+      background: var(--danger);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .card,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .card {
+      min-height: 116px;
+      padding: 18px;
+      display: grid;
+      align-content: space-between;
+    }
+
+    .card span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .card strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
+      gap: 16px;
+    }
+
+    .panel {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .panel header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+      padding: 16px 18px;
+    }
+
+    .panel h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: 0;
+    }
+
+    .api-control {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .api-control input {
+      width: min(340px, 48vw);
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .api-control button,
+    .primary {
+      min-height: 38px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--brand);
+      color: #fff;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 560px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    td {
+      color: var(--ink);
+    }
+
+    .stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      padding: 16px 18px 18px;
+    }
+
+    .item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .item small {
+      color: var(--muted);
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: 14px;
+      }
+
+      .nav {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .nav button {
+        flex: 0 0 auto;
+      }
+
+      .main {
+        padding: 18px;
+      }
+
+      .topbar,
+      .panel header {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .cards,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .api-control {
+        width: 100%;
+      }
+
+      .api-control input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="logo_mooluck.jpeg" alt="Moo Luck">
+        <h1>Moo Luck</h1>
+      </div>
+      <nav class="nav" aria-label="Secciones">
+        <button class="active" type="button">Dashboard</button>
+        <button type="button">Ganado</button>
+        <button type="button">Produccion</button>
+        <button type="button">Salud</button>
+        <button type="button">Finanzas</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="title">
+          <h2>Dashboard ganadero</h2>
+          <p>Vista local conectada a la API Django y Neon PostgreSQL.</p>
         </div>
-
-        <nav className="mt-10 flex flex-col gap-4 text-lg">
-          <button className="text-left hover:bg-[#3d8361] p-3 rounded-xl transition">
-            📊 Dashboard
-          </button>
-          <button className="text-left hover:bg-[#3d8361] p-3 rounded-xl transition">
-            🐄 Ganado
-          </button>
-          <button className="text-left hover:bg-[#3d8361] p-3 rounded-xl transition">
-            🥛 Producción
-          </button>
-          <button className="text-left hover:bg-[#3d8361] p-3 rounded-xl transition">
-            💉 Salud
-          </button>
-          <button className="text-left hover:bg-[#3d8361] p-3 rounded-xl transition">
-            💰 Finanzas
-          </button>
-          <button className="text-left hover:bg-[#3d8361] p-3 rounded-xl transition">
-            📦 Inventario
-          </button>
-        </nav>
-      </aside>
-
-      {/* Main content */}
-      <main className="flex-1 p-6 md:p-10 overflow-y-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h2 className="text-4xl font-bold text-[#2f5d50]">
-              Dashboard Ganadero
-            </h2>
-            <p className="text-gray-600 mt-2">
-              Controla la producción, salud y finanzas de tu ganado.
-            </p>
-          </div>
-
-          <button className="bg-[#3d8361] hover:bg-[#2f5d50] text-white px-5 py-3 rounded-2xl shadow transition">
-            + Registrar animal
-          </button>
+        <div class="status" id="status">
+          <span class="dot" id="statusDot"></span>
+          <span id="statusText">Conectando...</span>
         </div>
+      </div>
 
-        {/* Stats */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mt-10">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-3xl shadow-md p-6 hover:shadow-xl transition"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-500 text-sm">{stat.title}</p>
-                  <h3 className="text-3xl font-bold mt-2">{stat.value}</h3>
-                </div>
-                <span className="text-4xl">{stat.icon}</span>
-              </div>
-            </div>
-          ))}
-        </section>
+      <section class="cards" aria-label="Resumen">
+        <article class="card">
+          <span>Animales registrados</span>
+          <strong id="animalsCount">-</strong>
+        </article>
+        <article class="card">
+          <span>Fincas</span>
+          <strong id="farmsCount">-</strong>
+        </article>
+        <article class="card">
+          <span>Produccion diaria</span>
+          <strong id="milkTotal">-</strong>
+        </article>
+        <article class="card">
+          <span>Eventos proximos</span>
+          <strong id="eventsCount">-</strong>
+        </article>
+      </section>
 
-        {/* Animals Table */}
-        <section className="mt-12 bg-white rounded-3xl shadow-md p-6 overflow-x-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-[#2f5d50]">
-              Gestión de Ganado
-            </h3>
-            <button className="bg-[#3d8361] text-white px-4 py-2 rounded-xl hover:bg-[#2f5d50] transition">
-              Ver todos
-            </button>
+      <section class="panel" style="margin-bottom: 16px;">
+        <header>
+          <h3>Conexion API</h3>
+          <div class="api-control">
+            <input id="apiBase" aria-label="URL base API" placeholder="http://192.168.1.35:8000">
+            <button type="button" id="saveApi">Actualizar</button>
           </div>
+        </header>
+      </section>
 
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b">
-                <th className="p-3">ID</th>
-                <th className="p-3">Nombre</th>
-                <th className="p-3">Raza</th>
-                <th className="p-3">Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {animals.map((animal, index) => (
-                <tr key={index} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{animal.id}</td>
-                  <td className="p-3">{animal.name}</td>
-                  <td className="p-3">{animal.breed}</td>
-                  <td className="p-3">{animal.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-
-        {/* Production */}
-        <section className="mt-12 bg-white rounded-3xl shadow-md p-6 overflow-x-auto">
-          <h3 className="text-2xl font-bold text-[#2f5d50] mb-6">
-            Producción Lechera
-          </h3>
-
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b">
-                <th className="p-3">Fecha</th>
-                <th className="p-3">Animal</th>
-                <th className="p-3">Litros</th>
-              </tr>
-            </thead>
-            <tbody>
-              {milkProduction.map((item, index) => (
-                <tr key={index} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{item.date}</td>
-                  <td className="p-3">{item.animal}</td>
-                  <td className="p-3">{item.liters}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-
-        {/* Events and finances */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-12">
-          <section className="bg-white rounded-3xl shadow-md p-6 overflow-x-auto">
-            <h3 className="text-2xl font-bold text-[#2f5d50] mb-6">
-              Eventos Sanitarios
-            </h3>
-
-            <table className="w-full text-left border-collapse">
+      <div class="grid">
+        <section class="panel">
+          <header>
+            <h3>Ganado</h3>
+            <button class="primary" type="button" id="refresh">Recargar</button>
+          </header>
+          <div class="table-wrap">
+            <table>
               <thead>
-                <tr className="border-b">
-                  <th className="p-3">Animal</th>
-                  <th className="p-3">Evento</th>
-                  <th className="p-3">Fecha</th>
+                <tr>
+                  <th>Codigo</th>
+                  <th>Nombre</th>
+                  <th>Raza</th>
+                  <th>Estado</th>
                 </tr>
               </thead>
-              <tbody>
-                {events.map((event, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
-                    <td className="p-3">{event.animal}</td>
-                    <td className="p-3">{event.event}</td>
-                    <td className="p-3">{event.date}</td>
-                  </tr>
-                ))}
+              <tbody id="animalsBody">
+                <tr><td colspan="4">Cargando...</td></tr>
               </tbody>
             </table>
+          </div>
+        </section>
+
+        <div class="stack">
+          <section class="panel">
+            <header>
+              <h3>Eventos sanitarios</h3>
+            </header>
+            <div class="list" id="eventsList"></div>
           </section>
 
-          <section className="bg-white rounded-3xl shadow-md p-6 overflow-x-auto">
-            <h3 className="text-2xl font-bold text-[#2f5d50] mb-6">
-              Finanzas
-            </h3>
-
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b">
-                  <th className="p-3">Tipo</th>
-                  <th className="p-3">Descripción</th>
-                  <th className="p-3">Monto</th>
-                </tr>
-              </thead>
-              <tbody>
-                {finances.map((finance, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
-                    <td className="p-3">{finance.type}</td>
-                    <td className="p-3">{finance.description}</td>
-                    <td className="p-3">{finance.amount}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <section class="panel">
+            <header>
+              <h3>Fincas</h3>
+            </header>
+            <div class="list" id="farmsList"></div>
           </section>
         </div>
-      </main>
-    </div>
-  );
-}
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const host = window.location.hostname && window.location.hostname !== 'localhost'
+      ? window.location.hostname
+      : '127.0.0.1';
+    const defaultApiBase = `${window.location.protocol === 'file:' ? 'http:' : window.location.protocol}//${host}:8000`;
+    const apiInput = document.getElementById('apiBase');
+    const savedApiBase = localStorage.getItem('mooLuckApiBase') || defaultApiBase;
+
+    apiInput.value = savedApiBase;
+
+    const state = {
+      apiBase: savedApiBase.replace(/\/$/, ''),
+    };
+
+    function endpoint(path) {
+      return `${state.apiBase}/api/v1/${path}`;
+    }
+
+    function normalizeList(payload) {
+      if (Array.isArray(payload)) return payload;
+      if (payload && Array.isArray(payload.results)) return payload.results;
+      return [];
+    }
+
+    async function getJson(path) {
+      const response = await fetch(endpoint(path), { headers: { Accept: 'application/json' } });
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      return response.json();
+    }
+
+    function setStatus(kind, message) {
+      const dot = document.getElementById('statusDot');
+      dot.className = `dot ${kind}`;
+      document.getElementById('statusText').textContent = message;
+    }
+
+    function renderAnimals(items) {
+      const body = document.getElementById('animalsBody');
+      if (!items.length) {
+        body.innerHTML = '<tr><td colspan="4">No hay animales registrados.</td></tr>';
+        return;
+      }
+      body.innerHTML = items.map((animal) => `
+        <tr>
+          <td>${animal.codigo || '-'}</td>
+          <td>${animal.nombre || '-'}</td>
+          <td>${animal.raza || '-'}</td>
+          <td>${animal.estado || '-'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderList(targetId, items, titleKey, subtitle) {
+      const target = document.getElementById(targetId);
+      if (!items.length) {
+        target.innerHTML = '<div class="empty">Sin datos para mostrar.</div>';
+        return;
+      }
+      target.innerHTML = items.slice(0, 5).map((item) => `
+        <article class="item">
+          <strong>${item[titleKey] || '-'}</strong>
+          <small>${subtitle(item)}</small>
+        </article>
+      `).join('');
+    }
+
+    async function loadDashboard() {
+      setStatus('', 'Conectando...');
+      try {
+        const [animalsData, farmsData, productionData, eventsData] = await Promise.all([
+          getJson('animales/'),
+          getJson('fincas/'),
+          getJson('producciones/'),
+          getJson('eventos-sanitarios/proximos/'),
+        ]);
+
+        const animals = normalizeList(animalsData);
+        const farms = normalizeList(farmsData);
+        const productions = normalizeList(productionData);
+        const events = normalizeList(eventsData);
+        const milkTotal = productions.reduce((sum, item) => sum + Number(item.litros_total || 0), 0);
+
+        document.getElementById('animalsCount').textContent = animals.length;
+        document.getElementById('farmsCount').textContent = farms.length;
+        document.getElementById('milkTotal').textContent = `${milkTotal.toFixed(1)} L`;
+        document.getElementById('eventsCount').textContent = events.length;
+
+        renderAnimals(animals);
+        renderList('eventsList', events, 'tipo', (item) => `${item.fecha || '-'} / Proxima: ${item.proxima_fecha || '-'}`);
+        renderList('farmsList', farms, 'nombre', (item) => [item.municipio, item.departamento].filter(Boolean).join(', ') || 'Ubicacion no registrada');
+
+        setStatus('ok', 'API conectada');
+      } catch (error) {
+        setStatus('fail', 'Sin conexion API');
+        document.getElementById('animalsBody').innerHTML = `<tr><td colspan="4">No se pudo conectar con ${state.apiBase}</td></tr>`;
+        document.getElementById('eventsList').innerHTML = '<div class="empty">Revisa que Django este corriendo en la red local.</div>';
+        document.getElementById('farmsList').innerHTML = '<div class="empty">Revisa la URL de la API.</div>';
+      }
+    }
+
+    document.getElementById('saveApi').addEventListener('click', () => {
+      state.apiBase = apiInput.value.trim().replace(/\/$/, '');
+      localStorage.setItem('mooLuckApiBase', state.apiBase);
+      loadDashboard();
+    });
+
+    document.getElementById('refresh').addEventListener('click', loadDashboard);
+    loadDashboard();
+  </script>
+</body>
+</html>

@@ -3,6 +3,7 @@ Django settings para el sistema de gestión ganadera.
 Conectado a Neon PostgreSQL.
 """
 import os
+import urllib.parse as urlparse
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -10,11 +11,15 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+def env_list(name, default=''):
+    return [item.strip() for item in os.getenv(name, default).split(',') if item.strip()]
+
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-cambia-esto-en-produccion')
 
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 
 # =========================
 # APPS INSTALADAS
@@ -30,6 +35,7 @@ INSTALLED_APPS = [
     # Terceros
     'rest_framework',
     'corsheaders',
+    'django_filters',
 
     # Apps del proyecto
     'apps.fincas',
@@ -79,8 +85,13 @@ WSGI_APPLICATION = 'ganaderia.wsgi.application'
 DATABASE_URL = os.getenv('DATABASE_URL', '')
 
 if DATABASE_URL:
-    import urllib.parse as urlparse
     url = urlparse.urlparse(DATABASE_URL)
+    query_options = {
+        key: values[-1]
+        for key, values in urlparse.parse_qs(url.query).items()
+        if key in {'sslmode', 'channel_binding'}
+    }
+    query_options.setdefault('sslmode', 'require')
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -89,9 +100,7 @@ if DATABASE_URL:
             'PASSWORD': url.password,
             'HOST': url.hostname,
             'PORT': url.port or 5432,
-            'OPTIONS': {
-                'sslmode': 'require',  # Neon requiere SSL
-            },
+            'OPTIONS': query_options,
         }
     }
 else:
@@ -123,10 +132,10 @@ REST_FRAMEWORK = {
 # CORS (para frontend)
 # =========================
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # Solo en desarrollo
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-]
+CORS_ALLOWED_ORIGINS = env_list(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://localhost:5173'
+)
 
 # =========================
 # INTERNACIONALIZACIÓN
