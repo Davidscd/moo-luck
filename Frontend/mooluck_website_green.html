@@ -7,47 +7,57 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #f4f7f2;
-      --panel: #ffffff;
-      --ink: #21342e;
-      --muted: #64736d;
-      --line: #dce6df;
+      --bg: #f3f6f0;
+      --surface: #ffffff;
+      --surface-soft: #f8faf5;
+      --ink: #1f302b;
+      --muted: #66756f;
+      --line: #dbe5de;
       --brand: #2f6f53;
-      --brand-strong: #214d3c;
-      --accent: #c89b3c;
-      --danger: #b54c4c;
-      --shadow: 0 16px 40px rgba(33, 52, 46, 0.1);
+      --brand-dark: #1f4e3d;
+      --gold: #bd8f2f;
+      --blue: #2f6688;
+      --red: #b84b4b;
+      --amber-soft: #fff4d8;
+      --red-soft: #fff0f0;
+      --green-soft: #eef7ef;
+      --blue-soft: #edf6fb;
+      --shadow: 0 14px 34px rgba(31, 48, 43, 0.11);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       min-height: 100vh;
-      background: var(--bg);
+      background:
+        linear-gradient(180deg, rgba(47, 111, 83, 0.08), transparent 260px),
+        var(--bg);
       color: var(--ink);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    button, input {
-      font: inherit;
-    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: wait; opacity: 0.7; }
 
     .shell {
       min-height: 100vh;
       display: grid;
-      grid-template-columns: 260px 1fr;
+      grid-template-columns: 252px minmax(0, 1fr);
     }
 
     .sidebar {
-      background: var(--brand-strong);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: linear-gradient(180deg, var(--brand-dark), #183b32);
       color: #fff;
-      padding: 24px;
+      padding: 22px;
       display: flex;
       flex-direction: column;
-      gap: 28px;
+      gap: 24px;
+      border-right: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .brand {
@@ -57,11 +67,12 @@
     }
 
     .brand img {
-      width: 48px;
-      height: 48px;
-      border-radius: 8px;
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
       object-fit: cover;
       background: #fff;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
     }
 
     .brand h1 {
@@ -70,12 +81,20 @@
       letter-spacing: 0;
     }
 
+    .brand span {
+      display: block;
+      margin-top: 2px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.78rem;
+    }
+
     .nav {
       display: grid;
       gap: 8px;
     }
 
-    .nav button {
+    .nav button,
+    .bottom-nav button {
       min-height: 44px;
       border: 0;
       border-radius: 8px;
@@ -83,17 +102,27 @@
       color: #eef8f2;
       text-align: left;
       padding: 10px 12px;
-      cursor: pointer;
     }
 
     .nav button.active,
     .nav button:hover {
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.13);
+    }
+
+    .sidebar-note {
+      margin-top: auto;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      padding: 12px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.9rem;
+      line-height: 1.45;
     }
 
     .main {
       min-width: 0;
       padding: 28px;
+      padding-bottom: 92px;
     }
 
     .topbar {
@@ -101,12 +130,12 @@
       justify-content: space-between;
       align-items: center;
       gap: 16px;
-      margin-bottom: 22px;
+      margin-bottom: 18px;
     }
 
     .title h2 {
       margin: 0;
-      font-size: clamp(1.6rem, 4vw, 2.25rem);
+      font-size: clamp(1.65rem, 4vw, 2.45rem);
       letter-spacing: 0;
     }
 
@@ -120,7 +149,7 @@
       align-items: center;
       gap: 8px;
       border: 1px solid var(--line);
-      background: var(--panel);
+      background: rgba(255, 255, 255, 0.86);
       border-radius: 8px;
       padding: 10px 12px;
       color: var(--muted);
@@ -132,16 +161,62 @@
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      background: var(--accent);
+      background: var(--gold);
     }
 
-    .dot.ok {
-      background: var(--brand);
+    .dot.ok { background: var(--brand); }
+    .dot.fail { background: var(--red); }
+
+    .today-strip {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) repeat(3, minmax(150px, 0.45fr));
+      gap: 12px;
+      margin-bottom: 16px;
     }
 
-    .dot.fail {
-      background: var(--danger);
+    .today-card,
+    .card,
+    .panel,
+    .drawer {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
     }
+
+    .today-card {
+      min-height: 122px;
+      padding: 18px;
+      display: grid;
+      align-content: space-between;
+    }
+
+    .today-card small,
+    .card span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .today-card strong,
+    .card strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .today-card.hero {
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(31, 78, 61, 0.96), rgba(47, 111, 83, 0.88)),
+        url("logo_mooluck.jpeg");
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+    }
+
+    .today-card.hero small { color: rgba(255, 255, 255, 0.78); }
+    .today-card.hero strong { font-size: clamp(1.6rem, 5vw, 2.5rem); }
 
     .cards {
       display: grid;
@@ -150,42 +225,23 @@
       margin-bottom: 18px;
     }
 
-    .card,
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      box-shadow: var(--shadow);
-    }
-
     .card {
-      min-height: 116px;
-      padding: 18px;
+      min-height: 104px;
+      padding: 16px;
       display: grid;
       align-content: space-between;
+      border-top: 3px solid transparent;
     }
 
-    .card span {
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .card strong {
-      display: block;
-      margin-top: 10px;
-      font-size: 2rem;
-      line-height: 1;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
-      gap: 16px;
-    }
+    .card.production { border-top-color: var(--blue); }
+    .card.health { border-top-color: var(--gold); }
+    .card.finance { border-top-color: var(--brand); }
+    .card.risk { border-top-color: var(--red); }
 
     .panel {
       min-width: 0;
       overflow: hidden;
+      margin-bottom: 16px;
     }
 
     .panel header {
@@ -194,7 +250,8 @@
       align-items: center;
       gap: 12px;
       border-bottom: 1px solid var(--line);
-      padding: 16px 18px;
+      padding: 15px 18px;
+      background: rgba(248, 250, 245, 0.72);
     }
 
     .panel h3 {
@@ -203,41 +260,82 @@
       letter-spacing: 0;
     }
 
-    .api-control {
+    .toolbar {
       display: flex;
       gap: 8px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
-    .api-control input {
-      width: min(340px, 48vw);
+    .toolbar input { width: min(360px, 48vw); }
+
+    .primary,
+    .secondary,
+    .danger,
+    .ghost {
       min-height: 38px;
+      border-radius: 8px;
+      padding: 8px 12px;
+      border: 0;
+    }
+
+    .primary { background: var(--brand); color: #fff; }
+    .secondary { background: var(--blue); color: #fff; }
+    .danger { background: var(--red); color: #fff; }
+    .ghost { background: #eef5f0; color: var(--brand-dark); border: 1px solid var(--line); }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 40px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 8px 10px;
+      padding: 9px 10px;
       color: var(--ink);
       background: #fff;
     }
 
-    .api-control button,
-    .primary {
-      min-height: 38px;
-      border: 0;
-      border-radius: 8px;
-      background: var(--brand);
-      color: #fff;
-      padding: 8px 12px;
-      cursor: pointer;
+    textarea {
+      min-height: 84px;
+      resize: vertical;
     }
 
-    .table-wrap {
-      overflow-x: auto;
+    .form-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
     }
+
+    .table-wrap { overflow-x: auto; }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 560px;
+      min-width: 760px;
     }
 
     th, td {
@@ -249,17 +347,40 @@
 
     th {
       color: var(--muted);
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 700;
       text-transform: uppercase;
     }
 
-    td {
-      color: var(--ink);
+    td { color: var(--ink); }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      border-radius: 999px;
+      padding: 3px 10px;
+      background: #eef5f0;
+      color: var(--brand-dark);
+      font-size: 0.86rem;
+      white-space: nowrap;
     }
 
-    .stack {
+    .pill.activo { background: var(--green-soft); color: var(--brand-dark); }
+    .pill.gestante { background: var(--amber-soft); color: #76591c; }
+    .pill.seco { background: var(--blue-soft); color: var(--blue); }
+    .pill.vendido,
+    .pill.muerto { background: var(--red-soft); color: var(--red); }
+
+    .money-income { color: var(--brand); font-weight: 700; }
+    .money-expense { color: var(--red); font-weight: 700; }
+
+    .module { display: none; }
+    .module.active { display: block; }
+
+    .grid-two {
       display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(310px, 0.5fr);
       gap: 16px;
     }
 
@@ -275,42 +396,148 @@
       padding: 12px;
       display: grid;
       gap: 4px;
+      background: #fff;
     }
 
-    .item small {
-      color: var(--muted);
-    }
+    .item.alert-high { background: var(--red-soft); border-color: #f1c8c8; }
+    .item.alert-medium { background: var(--amber-soft); border-color: #edd69a; }
+    .item.alert-info { background: var(--blue-soft); border-color: #c9e2ed; }
+
+    .item small { color: var(--muted); }
 
     .empty {
       color: var(--muted);
       padding: 18px;
     }
 
-    @media (max-width: 900px) {
-      .shell {
-        grid-template-columns: 1fr;
+    .message {
+      min-height: 24px;
+      color: var(--muted);
+      padding: 0 18px 16px;
+    }
+
+    .message.error { color: var(--red); }
+    .message.ok { color: var(--brand); }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      background: rgba(18, 29, 25, 0.36);
+      padding: 18px;
+    }
+
+    .drawer-backdrop.active {
+      display: grid;
+      justify-items: end;
+    }
+
+    .drawer {
+      width: min(560px, 100%);
+      height: 100%;
+      overflow: auto;
+      padding: 18px;
+    }
+
+    .drawer header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+
+    .drawer h3 {
+      margin: 0;
+      font-size: 1.45rem;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--surface-soft);
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+    }
+
+    .metric strong {
+      font-size: 1.25rem;
+    }
+
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 15;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      background: rgba(31, 78, 61, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 14px;
+      padding: 8px;
+      box-shadow: 0 18px 38px rgba(31, 48, 43, 0.28);
+    }
+
+    .bottom-nav button {
+      min-height: 46px;
+      padding: 6px;
+      text-align: center;
+      font-size: 0.78rem;
+      border-radius: 10px;
+    }
+
+    .bottom-nav button.active {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    @media (max-width: 1100px) {
+      .today-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .cards,
+      .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-two {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .shell { grid-template-columns: 1fr; }
+
       .sidebar {
-        position: sticky;
-        top: 0;
-        z-index: 2;
+        position: static;
+        height: auto;
         padding: 14px;
       }
 
-      .nav {
-        display: flex;
-        overflow-x: auto;
-        padding-bottom: 2px;
+      .sidebar .nav,
+      .sidebar-note {
+        display: none;
       }
 
-      .nav button {
-        flex: 0 0 auto;
-      }
-
-      .main {
-        padding: 18px;
-      }
+      .main { padding: 18px; padding-bottom: 92px; }
 
       .topbar,
       .panel header {
@@ -318,18 +545,15 @@
         flex-direction: column;
       }
 
+      .today-strip,
       .cards,
-      .grid {
+      .form-grid,
+      .metric-grid {
         grid-template-columns: 1fr;
       }
 
-      .api-control {
-        width: 100%;
-      }
-
-      .api-control input {
-        width: 100%;
-      }
+      .toolbar input { width: 100%; }
+      .bottom-nav { display: grid; }
     }
   </style>
 </head>
@@ -338,64 +562,187 @@
     <aside class="sidebar">
       <div class="brand">
         <img src="logo_mooluck.jpeg" alt="Moo Luck">
-        <h1>Moo Luck</h1>
+        <div>
+          <h1>Moo Luck</h1>
+          <span>Operacion ganadera</span>
+        </div>
       </div>
       <nav class="nav" aria-label="Secciones">
-        <button class="active" type="button">Dashboard</button>
-        <button type="button">Ganado</button>
-        <button type="button">Produccion</button>
-        <button type="button">Salud</button>
-        <button type="button">Finanzas</button>
+        <button class="active" type="button" data-module="dashboard">Dashboard</button>
+        <button type="button" data-module="ganado">Ganado</button>
+        <button type="button" data-module="produccion">Produccion</button>
+        <button type="button" data-module="salud">Salud</button>
+        <button type="button" data-module="finanzas">Finanzas</button>
       </nav>
+      <div class="sidebar-note">
+        Alertas calculadas con produccion, salud y finanzas para priorizar el trabajo diario.
+      </div>
     </aside>
 
     <main class="main">
       <div class="topbar">
         <div class="title">
-          <h2>Dashboard ganadero</h2>
-          <p>Vista local conectada a la API Django y Neon PostgreSQL.</p>
+          <h2 id="pageTitle">Dashboard ganadero</h2>
+          <p id="pageSubtitle">Vista local conectada a Django y Neon PostgreSQL.</p>
         </div>
-        <div class="status" id="status">
+        <div class="status">
           <span class="dot" id="statusDot"></span>
           <span id="statusText">Conectando...</span>
         </div>
       </div>
 
-      <section class="cards" aria-label="Resumen">
-        <article class="card">
-          <span>Animales registrados</span>
-          <strong id="animalsCount">-</strong>
+      <section class="today-strip" aria-label="Resumen operativo">
+        <article class="today-card hero">
+          <small>Prioridad del dia</small>
+          <strong id="todayPriority">Cargando operacion</strong>
         </article>
-        <article class="card">
-          <span>Fincas</span>
-          <strong id="farmsCount">-</strong>
+        <article class="today-card">
+          <small>Animales activos</small>
+          <strong id="activeAnimalsCount">-</strong>
         </article>
-        <article class="card">
-          <span>Produccion diaria</span>
-          <strong id="milkTotal">-</strong>
+        <article class="today-card">
+          <small>Litros hoy</small>
+          <strong id="todayMilk">-</strong>
         </article>
-        <article class="card">
-          <span>Eventos proximos</span>
-          <strong id="eventsCount">-</strong>
+        <article class="today-card">
+          <small>Alertas abiertas</small>
+          <strong id="alertsCount">-</strong>
         </article>
       </section>
 
-      <section class="panel" style="margin-bottom: 16px;">
+      <section class="cards" aria-label="Resumen">
+        <article class="card production">
+          <span>Animales registrados</span>
+          <strong id="animalsCount">-</strong>
+        </article>
+        <article class="card health">
+          <span>Fincas</span>
+          <strong id="farmsCount">-</strong>
+        </article>
+        <article class="card production">
+          <span>Litros registrados</span>
+          <strong id="milkTotal">-</strong>
+        </article>
+        <article class="card finance">
+          <span>Balance financiero</span>
+          <strong id="balanceTotal">-</strong>
+        </article>
+      </section>
+
+      <section class="panel">
         <header>
           <h3>Conexion API</h3>
-          <div class="api-control">
+          <div class="toolbar">
             <input id="apiBase" aria-label="URL base API" placeholder="http://192.168.1.35:8000">
-            <button type="button" id="saveApi">Actualizar</button>
+            <button class="primary" type="button" id="saveApi">Actualizar</button>
+            <button class="secondary" type="button" id="refreshAll">Recargar datos</button>
           </div>
         </header>
       </section>
 
-      <div class="grid">
+      <section class="module active" id="module-dashboard">
+        <div class="grid-two">
+          <section class="panel">
+            <header>
+              <h3>Ganado reciente</h3>
+              <button class="primary" type="button" data-goto="ganado">Gestionar</button>
+            </header>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Codigo</th>
+                    <th>Nombre</th>
+                    <th>Raza</th>
+                    <th>Estado</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardAnimalsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <div>
+            <section class="panel">
+              <header>
+                <h3>Alertas inteligentes</h3>
+              </header>
+              <div class="list" id="alertsList"></div>
+            </section>
+            <section class="panel">
+              <header>
+                <h3>Fincas</h3>
+              </header>
+              <div class="list" id="dashboardFarmsList"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="module" id="module-ganado">
         <section class="panel">
           <header>
-            <h3>Ganado</h3>
-            <button class="primary" type="button" id="refresh">Recargar</button>
+            <h3>Registrar animal</h3>
           </header>
+          <form class="form-grid" id="animalForm">
+            <div class="field">
+              <label for="animalCodigo">Codigo</label>
+              <input id="animalCodigo" name="codigo" required placeholder="VAC-004">
+            </div>
+            <div class="field">
+              <label for="animalNombre">Nombre</label>
+              <input id="animalNombre" name="nombre" placeholder="Luna">
+            </div>
+            <div class="field">
+              <label for="animalRaza">Raza</label>
+              <input id="animalRaza" name="raza" placeholder="Holstein">
+            </div>
+            <div class="field">
+              <label for="animalFinca">Finca</label>
+              <select id="animalFinca" name="finca"></select>
+            </div>
+            <div class="field">
+              <label for="animalSexo">Sexo</label>
+              <select id="animalSexo" name="sexo">
+                <option value="">Sin definir</option>
+                <option value="hembra">Hembra</option>
+                <option value="macho">Macho</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="animalProposito">Proposito</label>
+              <select id="animalProposito" name="proposito">
+                <option value="">Sin definir</option>
+                <option value="leche">Leche</option>
+                <option value="carne">Carne</option>
+                <option value="doble_proposito">Doble proposito</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="animalEstado">Estado</label>
+              <select id="animalEstado" name="estado">
+                <option value="">Sin definir</option>
+                <option value="activo">Activo</option>
+                <option value="gestante">Gestante</option>
+                <option value="seco">Seco</option>
+                <option value="vendido">Vendido</option>
+                <option value="muerto">Muerto</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="animalNacimiento">Nacimiento</label>
+              <input id="animalNacimiento" name="fecha_nacimiento" type="date">
+            </div>
+            <div class="field">
+              <label for="animalPeso">Peso inicial kg</label>
+              <input id="animalPeso" name="peso_inicial" type="number" step="0.01" min="0">
+            </div>
+            <div class="form-actions">
+              <button class="primary" type="submit">Guardar animal</button>
+            </div>
+          </form>
+          <div class="message" id="animalMessage"></div>
           <div class="table-wrap">
             <table>
               <thead>
@@ -403,33 +750,248 @@
                   <th>Codigo</th>
                   <th>Nombre</th>
                   <th>Raza</th>
+                  <th>Sexo</th>
+                  <th>Proposito</th>
                   <th>Estado</th>
+                  <th></th>
                 </tr>
               </thead>
-              <tbody id="animalsBody">
-                <tr><td colspan="4">Cargando...</td></tr>
-              </tbody>
+              <tbody id="animalsBody"></tbody>
             </table>
           </div>
         </section>
+      </section>
 
-        <div class="stack">
+      <section class="module" id="module-produccion">
+        <section class="panel">
+          <header>
+            <h3>Registrar produccion</h3>
+          </header>
+          <form class="form-grid" id="productionForm">
+            <div class="field">
+              <label for="productionAnimal">Animal</label>
+              <select id="productionAnimal" name="animal" required></select>
+            </div>
+            <div class="field">
+              <label for="productionDate">Fecha</label>
+              <input id="productionDate" name="fecha" type="date" required>
+            </div>
+            <div class="field">
+              <label for="litrosManana">Litros manana</label>
+              <input id="litrosManana" name="litros_manana" type="number" step="0.01" min="0" value="0">
+            </div>
+            <div class="field">
+              <label for="litrosTarde">Litros tarde</label>
+              <input id="litrosTarde" name="litros_tarde" type="number" step="0.01" min="0" value="0">
+            </div>
+            <div class="field full">
+              <label for="productionNotes">Observaciones</label>
+              <textarea id="productionNotes" name="observaciones"></textarea>
+            </div>
+            <div class="form-actions">
+              <button class="primary" type="submit">Guardar produccion</button>
+            </div>
+          </form>
+          <div class="message" id="productionMessage"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Animal</th>
+                  <th>Manana</th>
+                  <th>Tarde</th>
+                  <th>Total</th>
+                  <th>Observaciones</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="productionBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="module" id="module-salud">
+        <section class="panel">
+          <header>
+            <h3>Registrar evento sanitario</h3>
+          </header>
+          <form class="form-grid" id="healthForm">
+            <div class="field">
+              <label for="healthAnimal">Animal</label>
+              <select id="healthAnimal" name="animal" required></select>
+            </div>
+            <div class="field">
+              <label for="healthTipo">Tipo</label>
+              <input id="healthTipo" name="tipo" required placeholder="Vacunacion">
+            </div>
+            <div class="field">
+              <label for="healthDate">Fecha</label>
+              <input id="healthDate" name="fecha" type="date" required>
+            </div>
+            <div class="field">
+              <label for="healthNextDate">Proxima fecha</label>
+              <input id="healthNextDate" name="proxima_fecha" type="date">
+            </div>
+            <div class="field">
+              <label for="healthMedicine">Medicamento</label>
+              <input id="healthMedicine" name="medicamento">
+            </div>
+            <div class="field">
+              <label for="healthDose">Dosis</label>
+              <input id="healthDose" name="dosis" type="number" step="0.01" min="0">
+            </div>
+            <div class="field full">
+              <label for="healthDescription">Descripcion</label>
+              <textarea id="healthDescription" name="descripcion"></textarea>
+            </div>
+            <div class="form-actions">
+              <button class="primary" type="submit">Guardar evento</button>
+            </div>
+          </form>
+          <div class="message" id="healthMessage"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Animal</th>
+                  <th>Tipo</th>
+                  <th>Medicamento</th>
+                  <th>Proxima</th>
+                  <th>Descripcion</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="healthBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="module" id="module-finanzas">
+        <div class="grid-two">
           <section class="panel">
             <header>
-              <h3>Eventos sanitarios</h3>
+              <h3>Registrar transaccion</h3>
             </header>
-            <div class="list" id="eventsList"></div>
+            <form class="form-grid" id="financeForm">
+              <div class="field">
+                <label for="financeFinca">Finca</label>
+                <select id="financeFinca" name="finca" required></select>
+              </div>
+              <div class="field">
+                <label for="financeTipo">Tipo</label>
+                <select id="financeTipo" name="tipo" required>
+                  <option value="ingreso">Ingreso</option>
+                  <option value="egreso">Egreso</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="financeCategory">Categoria</label>
+                <select id="financeCategory" name="categoria"></select>
+              </div>
+              <div class="field">
+                <label for="financeAmount">Monto</label>
+                <input id="financeAmount" name="monto" type="number" step="0.01" min="0" required>
+              </div>
+              <div class="field">
+                <label for="financeDate">Fecha</label>
+                <input id="financeDate" name="fecha" type="date" required>
+              </div>
+              <div class="field full">
+                <label for="financeDescription">Descripcion</label>
+                <textarea id="financeDescription" name="descripcion"></textarea>
+              </div>
+              <div class="form-actions">
+                <button class="primary" type="submit">Guardar transaccion</button>
+              </div>
+            </form>
+            <div class="message" id="financeMessage"></div>
           </section>
 
           <section class="panel">
             <header>
-              <h3>Fincas</h3>
+              <h3>Nueva categoria</h3>
             </header>
-            <div class="list" id="farmsList"></div>
+            <form class="form-grid" id="categoryForm">
+              <div class="field">
+                <label for="categoryName">Nombre</label>
+                <input id="categoryName" name="nombre" required placeholder="Alimento">
+              </div>
+              <div class="field">
+                <label for="categoryType">Tipo</label>
+                <select id="categoryType" name="tipo">
+                  <option value="egreso">Egreso</option>
+                  <option value="ingreso">Ingreso</option>
+                </select>
+              </div>
+              <div class="form-actions">
+                <button class="secondary" type="submit">Guardar categoria</button>
+              </div>
+            </form>
+            <div class="message" id="categoryMessage"></div>
           </section>
         </div>
-      </div>
+
+        <section class="panel">
+          <header>
+            <h3>Movimientos financieros</h3>
+            <span class="pill" id="financeBalance">Balance: -</span>
+          </header>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Finca</th>
+                  <th>Tipo</th>
+                  <th>Categoria</th>
+                  <th>Monto</th>
+                  <th>Descripcion</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="financeBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
     </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Navegacion movil">
+    <button class="active" type="button" data-module="dashboard">Inicio</button>
+    <button type="button" data-module="ganado">Ganado</button>
+    <button type="button" data-module="produccion">Leche</button>
+    <button type="button" data-module="salud">Salud</button>
+    <button type="button" data-module="finanzas">Dinero</button>
+  </nav>
+
+  <div class="drawer-backdrop" id="animalDrawer">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <header>
+        <div>
+          <h3 id="drawerTitle">Animal</h3>
+          <p id="drawerSubtitle"></p>
+        </div>
+        <button class="ghost" type="button" id="closeDrawer">Cerrar</button>
+      </header>
+      <div class="metric-grid" id="drawerMetrics"></div>
+      <section class="panel">
+        <header><h3>Alertas del animal</h3></header>
+        <div class="list" id="drawerAlerts"></div>
+      </section>
+      <section class="panel">
+        <header><h3>Produccion reciente</h3></header>
+        <div class="list" id="drawerProduction"></div>
+      </section>
+      <section class="panel">
+        <header><h3>Salud reciente</h3></header>
+        <div class="list" id="drawerHealth"></div>
+      </section>
+    </aside>
   </div>
 
   <script>
@@ -444,6 +1006,23 @@
 
     const state = {
       apiBase: savedApiBase.replace(/\/$/, ''),
+      module: 'dashboard',
+      animals: [],
+      farms: [],
+      productions: [],
+      events: [],
+      categories: [],
+      transactions: [],
+      balance: null,
+      alerts: [],
+    };
+
+    const moduleMeta = {
+      dashboard: ['Dashboard ganadero', 'Prioridades, alertas y lectura general de la finca.'],
+      ganado: ['Ganado', 'Registro, consulta y perfil 360 de animales.'],
+      produccion: ['Produccion', 'Control diario de litros por animal.'],
+      salud: ['Salud', 'Eventos sanitarios, tratamientos y proximas fechas.'],
+      finanzas: ['Finanzas', 'Ingresos, egresos, categorias y balance.'],
     };
 
     function endpoint(path) {
@@ -456,90 +1035,509 @@
       return [];
     }
 
-    async function getJson(path) {
-      const response = await fetch(endpoint(path), { headers: { Accept: 'application/json' } });
-      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    function today() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function daysBetween(from, to) {
+      const start = new Date(`${from}T00:00:00`);
+      const end = new Date(`${to}T00:00:00`);
+      return Math.round((end - start) / 86400000);
+    }
+
+    function money(value) {
+      const number = Number(value || 0);
+      return number.toLocaleString('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        maximumFractionDigits: 0,
+      });
+    }
+
+    function lit(value) {
+      return `${Number(value || 0).toFixed(1)} L`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+      }[char]));
+    }
+
+    function compactPayload(form) {
+      const data = Object.fromEntries(new FormData(form).entries());
+      Object.keys(data).forEach((key) => {
+        if (data[key] === '') delete data[key];
+      });
+      return data;
+    }
+
+    async function requestJson(path, options = {}) {
+      const response = await fetch(endpoint(path), {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          ...(options.headers || {}),
+        },
+        ...options,
+      });
+      if (!response.ok) {
+        let detail = `${response.status} ${response.statusText}`;
+        try {
+          const payload = await response.json();
+          detail = Object.entries(payload).map(([key, value]) => `${key}: ${value}`).join(' | ') || detail;
+        } catch (_) {}
+        throw new Error(detail);
+      }
+      if (response.status === 204) return null;
       return response.json();
     }
 
     function setStatus(kind, message) {
-      const dot = document.getElementById('statusDot');
-      dot.className = `dot ${kind}`;
+      document.getElementById('statusDot').className = `dot ${kind || ''}`;
       document.getElementById('statusText').textContent = message;
     }
 
-    function renderAnimals(items) {
-      const body = document.getElementById('animalsBody');
-      if (!items.length) {
-        body.innerHTML = '<tr><td colspan="4">No hay animales registrados.</td></tr>';
-        return;
-      }
-      body.innerHTML = items.map((animal) => `
-        <tr>
-          <td>${animal.codigo || '-'}</td>
-          <td>${animal.nombre || '-'}</td>
-          <td>${animal.raza || '-'}</td>
-          <td>${animal.estado || '-'}</td>
-        </tr>
-      `).join('');
+    function setMessage(id, message, kind = '') {
+      const element = document.getElementById(id);
+      element.className = `message ${kind}`;
+      element.textContent = message;
     }
 
-    function renderList(targetId, items, titleKey, subtitle) {
+    function renderOptions(selectId, items, labelFn, includeEmpty = true) {
+      const select = document.getElementById(selectId);
+      const current = select.value;
+      select.innerHTML = includeEmpty ? '<option value="">Sin seleccionar</option>' : '';
+      select.insertAdjacentHTML('beforeend', items.map((item) => (
+        `<option value="${escapeHtml(item.id)}">${escapeHtml(labelFn(item))}</option>`
+      )).join(''));
+      if ([...select.options].some((option) => option.value === current)) {
+        select.value = current;
+      }
+    }
+
+    function renderTable(targetId, rows, emptyText) {
+      const target = document.getElementById(targetId);
+      target.innerHTML = rows.length ? rows.join('') : `<tr><td colspan="8">${emptyText}</td></tr>`;
+    }
+
+    function renderList(targetId, items, titleFn, subtitleFn, classFn = () => '') {
       const target = document.getElementById(targetId);
       if (!items.length) {
         target.innerHTML = '<div class="empty">Sin datos para mostrar.</div>';
         return;
       }
-      target.innerHTML = items.slice(0, 5).map((item) => `
-        <article class="item">
-          <strong>${item[titleKey] || '-'}</strong>
-          <small>${subtitle(item)}</small>
+      target.innerHTML = items.slice(0, 7).map((item) => `
+        <article class="item ${escapeHtml(classFn(item))}">
+          <strong>${escapeHtml(titleFn(item))}</strong>
+          <small>${escapeHtml(subtitleFn(item))}</small>
         </article>
       `).join('');
     }
 
-    async function loadDashboard() {
+    function animalLabel(animal) {
+      return `${animal.codigo || '-'}${animal.nombre ? ` - ${animal.nombre}` : ''}`;
+    }
+
+    function farmLabel(farm) {
+      return farm.nombre || farm.id;
+    }
+
+    function categoryLabel(category) {
+      return `${category.nombre || '-'}${category.tipo ? ` (${category.tipo})` : ''}`;
+    }
+
+    function animalNameById(id) {
+      const animal = state.animals.find((item) => item.id === id);
+      return animal ? animalLabel(animal) : id;
+    }
+
+    function statusPill(value) {
+      const status = value || '-';
+      return `<span class="pill ${escapeHtml(status)}">${escapeHtml(status)}</span>`;
+    }
+
+    function productionsForAnimal(animalId) {
+      return state.productions.filter((item) => item.animal === animalId);
+    }
+
+    function eventsForAnimal(animalId) {
+      return state.events.filter((item) => item.animal === animalId);
+    }
+
+    function buildAlerts() {
+      const alerts = [];
+      const dateToday = today();
+      const activeAnimals = state.animals.filter((animal) => animal.estado === 'activo' || animal.estado === 'gestante');
+      const productionsToday = state.productions.filter((item) => item.fecha === dateToday);
+      const producedAnimalIds = new Set(productionsToday.map((item) => item.animal));
+
+      activeAnimals.forEach((animal) => {
+        if (animal.proposito === 'leche' && !producedAnimalIds.has(animal.id)) {
+          alerts.push({
+            level: 'medium',
+            title: `${animalLabel(animal)} sin produccion hoy`,
+            detail: 'Registra litros o revisa si el animal esta seco/en observacion.',
+            animalId: animal.id,
+          });
+        }
+      });
+
+      state.events.forEach((event) => {
+        if (!event.proxima_fecha) return;
+        const diff = daysBetween(dateToday, event.proxima_fecha);
+        if (diff < 0) {
+          alerts.push({
+            level: 'high',
+            title: `${event.tipo || 'Evento'} vencido`,
+            detail: `${event.animal_codigo || animalNameById(event.animal)} tenia fecha ${event.proxima_fecha}.`,
+            animalId: event.animal,
+          });
+        } else if (diff <= 7) {
+          alerts.push({
+            level: 'medium',
+            title: `${event.tipo || 'Evento'} proximo`,
+            detail: `${event.animal_codigo || animalNameById(event.animal)} en ${diff} dias.`,
+            animalId: event.animal,
+          });
+        }
+      });
+
+      state.animals.forEach((animal) => {
+        const records = productionsForAnimal(animal.id)
+          .slice()
+          .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
+        if (records.length < 2) return;
+        const latest = Number(records[0].litros_total || 0);
+        const previous = records.slice(1, 6);
+        const average = previous.reduce((sum, item) => sum + Number(item.litros_total || 0), 0) / previous.length;
+        if (average > 0 && latest < average * 0.7) {
+          alerts.push({
+            level: 'high',
+            title: `${animalLabel(animal)} bajo produccion`,
+            detail: `Ultimo registro ${lit(latest)} frente a promedio ${lit(average)}.`,
+            animalId: animal.id,
+          });
+        }
+      });
+
+      if (state.balance && Number(state.balance.balance_neto || 0) < 0) {
+        alerts.push({
+          level: 'info',
+          title: 'Balance financiero negativo',
+          detail: `Balance actual ${money(state.balance.balance_neto)}. Revisa egresos recientes.`,
+        });
+      }
+
+      return alerts;
+    }
+
+    function renderAll() {
+      renderOptions('animalFinca', state.farms, farmLabel);
+      renderOptions('productionAnimal', state.animals, animalLabel, false);
+      renderOptions('healthAnimal', state.animals, animalLabel, false);
+      renderOptions('financeFinca', state.farms, farmLabel, false);
+      renderOptions('financeCategory', state.categories, categoryLabel);
+
+      state.alerts = buildAlerts();
+
+      const dateToday = today();
+      const milkTotal = state.productions.reduce((sum, item) => sum + Number(item.litros_total || 0), 0);
+      const todayMilk = state.productions
+        .filter((item) => item.fecha === dateToday)
+        .reduce((sum, item) => sum + Number(item.litros_total || 0), 0);
+      const balance = state.balance ? Number(state.balance.balance_neto || 0) : 0;
+      const activeAnimals = state.animals.filter((animal) => animal.estado === 'activo' || animal.estado === 'gestante').length;
+
+      document.getElementById('animalsCount').textContent = state.animals.length;
+      document.getElementById('farmsCount').textContent = state.farms.length;
+      document.getElementById('milkTotal').textContent = lit(milkTotal);
+      document.getElementById('todayMilk').textContent = lit(todayMilk);
+      document.getElementById('activeAnimalsCount').textContent = activeAnimals;
+      document.getElementById('alertsCount').textContent = state.alerts.length;
+      document.getElementById('balanceTotal').textContent = money(balance);
+      document.getElementById('financeBalance').textContent = `Balance: ${money(balance)}`;
+      document.getElementById('todayPriority').textContent = state.alerts[0]?.title || 'Operacion estable';
+
+      renderAnimals();
+      renderProductions();
+      renderHealth();
+      renderFinances();
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      renderTable('dashboardAnimalsBody', state.animals.slice(0, 6).map((animal) => `
+        <tr>
+          <td>${escapeHtml(animal.codigo || '-')}</td>
+          <td>${escapeHtml(animal.nombre || '-')}</td>
+          <td>${escapeHtml(animal.raza || '-')}</td>
+          <td>${statusPill(animal.estado)}</td>
+          <td><button class="ghost" type="button" data-profile="${animal.id}">Perfil</button></td>
+        </tr>
+      `), 'No hay animales registrados.');
+
+      renderList(
+        'alertsList',
+        state.alerts,
+        (item) => item.title,
+        (item) => item.detail,
+        (item) => `alert-${item.level}`
+      );
+
+      renderList(
+        'dashboardFarmsList',
+        state.farms,
+        (item) => item.nombre || '-',
+        (item) => [item.municipio, item.departamento].filter(Boolean).join(', ') || 'Ubicacion no registrada'
+      );
+    }
+
+    function renderAnimals() {
+      renderTable('animalsBody', state.animals.map((animal) => `
+        <tr>
+          <td>${escapeHtml(animal.codigo || '-')}</td>
+          <td>${escapeHtml(animal.nombre || '-')}</td>
+          <td>${escapeHtml(animal.raza || '-')}</td>
+          <td>${escapeHtml(animal.sexo || '-')}</td>
+          <td>${escapeHtml(animal.proposito || '-')}</td>
+          <td>${statusPill(animal.estado)}</td>
+          <td>
+            <button class="ghost" type="button" data-profile="${animal.id}">Perfil</button>
+            <button class="danger" type="button" data-delete="animales/${animal.id}/">Eliminar</button>
+          </td>
+        </tr>
+      `), 'No hay animales registrados.');
+    }
+
+    function renderProductions() {
+      renderTable('productionBody', state.productions.map((item) => `
+        <tr>
+          <td>${escapeHtml(item.fecha || '-')}</td>
+          <td>${escapeHtml(item.animal_codigo || animalNameById(item.animal) || '-')}</td>
+          <td>${lit(item.litros_manana)}</td>
+          <td>${lit(item.litros_tarde)}</td>
+          <td><strong>${lit(item.litros_total)}</strong></td>
+          <td>${escapeHtml(item.observaciones || '-')}</td>
+          <td><button class="danger" type="button" data-delete="producciones/${item.id}/">Eliminar</button></td>
+        </tr>
+      `), 'No hay producciones registradas.');
+    }
+
+    function renderHealth() {
+      renderTable('healthBody', state.events.map((item) => `
+        <tr>
+          <td>${escapeHtml(item.fecha || '-')}</td>
+          <td>${escapeHtml(item.animal_codigo || animalNameById(item.animal) || '-')}</td>
+          <td>${escapeHtml(item.tipo || '-')}</td>
+          <td>${escapeHtml(item.medicamento || '-')}</td>
+          <td>${escapeHtml(item.proxima_fecha || '-')}</td>
+          <td>${escapeHtml(item.descripcion || '-')}</td>
+          <td><button class="danger" type="button" data-delete="eventos-sanitarios/${item.id}/">Eliminar</button></td>
+        </tr>
+      `), 'No hay eventos sanitarios registrados.');
+    }
+
+    function renderFinances() {
+      renderTable('financeBody', state.transactions.map((item) => {
+        const className = item.tipo === 'ingreso' ? 'money-income' : 'money-expense';
+        return `
+          <tr>
+            <td>${escapeHtml(item.fecha || '-')}</td>
+            <td>${escapeHtml(item.finca_nombre || item.finca || '-')}</td>
+            <td><span class="pill">${escapeHtml(item.tipo || '-')}</span></td>
+            <td>${escapeHtml(item.categoria_nombre || '-')}</td>
+            <td class="${className}">${money(item.monto)}</td>
+            <td>${escapeHtml(item.descripcion || '-')}</td>
+            <td><button class="danger" type="button" data-delete="finanzas/transacciones/${item.id}/">Eliminar</button></td>
+          </tr>
+        `;
+      }), 'No hay movimientos financieros registrados.');
+    }
+
+    function openAnimalProfile(animalId) {
+      const animal = state.animals.find((item) => item.id === animalId);
+      if (!animal) return;
+
+      const productions = productionsForAnimal(animal.id)
+        .slice()
+        .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
+      const events = eventsForAnimal(animal.id)
+        .slice()
+        .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
+      const totalMilk = productions.reduce((sum, item) => sum + Number(item.litros_total || 0), 0);
+      const averageMilk = productions.length ? totalMilk / productions.length : 0;
+      const animalAlerts = state.alerts.filter((item) => item.animalId === animal.id);
+
+      document.getElementById('drawerTitle').textContent = animalLabel(animal);
+      document.getElementById('drawerSubtitle').textContent = [animal.raza, animal.sexo, animal.estado].filter(Boolean).join(' / ') || 'Sin clasificacion';
+      document.getElementById('drawerMetrics').innerHTML = [
+        ['Litros acumulados', lit(totalMilk)],
+        ['Promedio por registro', lit(averageMilk)],
+        ['Eventos sanitarios', events.length],
+        ['Ultima produccion', productions[0]?.fecha || '-'],
+      ].map(([label, value]) => `
+        <article class="metric">
+          <span>${escapeHtml(label)}</span>
+          <strong>${escapeHtml(value)}</strong>
+        </article>
+      `).join('');
+
+      renderList(
+        'drawerAlerts',
+        animalAlerts,
+        (item) => item.title,
+        (item) => item.detail,
+        (item) => `alert-${item.level}`
+      );
+      renderList(
+        'drawerProduction',
+        productions,
+        (item) => `${item.fecha || '-'} / ${lit(item.litros_total)}`,
+        (item) => `Manana ${lit(item.litros_manana)} / Tarde ${lit(item.litros_tarde)}`
+      );
+      renderList(
+        'drawerHealth',
+        events,
+        (item) => `${item.fecha || '-'} / ${item.tipo || '-'}`,
+        (item) => [item.medicamento, item.proxima_fecha ? `Proxima ${item.proxima_fecha}` : ''].filter(Boolean).join(' / ') || 'Sin detalle'
+      );
+
+      document.getElementById('animalDrawer').classList.add('active');
+    }
+
+    async function loadData() {
       setStatus('', 'Conectando...');
       try {
-        const [animalsData, farmsData, productionData, eventsData] = await Promise.all([
-          getJson('animales/'),
-          getJson('fincas/'),
-          getJson('producciones/'),
-          getJson('eventos-sanitarios/proximos/'),
+        const [animals, farms, productions, events, categories, transactions, balance] = await Promise.all([
+          requestJson('animales/'),
+          requestJson('fincas/'),
+          requestJson('producciones/'),
+          requestJson('eventos-sanitarios/'),
+          requestJson('finanzas/categorias/'),
+          requestJson('finanzas/transacciones/'),
+          requestJson('finanzas/transacciones/balance/'),
         ]);
 
-        const animals = normalizeList(animalsData);
-        const farms = normalizeList(farmsData);
-        const productions = normalizeList(productionData);
-        const events = normalizeList(eventsData);
-        const milkTotal = productions.reduce((sum, item) => sum + Number(item.litros_total || 0), 0);
+        state.animals = normalizeList(animals);
+        state.farms = normalizeList(farms);
+        state.productions = normalizeList(productions);
+        state.events = normalizeList(events);
+        state.categories = normalizeList(categories);
+        state.transactions = normalizeList(transactions);
+        state.balance = balance;
 
-        document.getElementById('animalsCount').textContent = animals.length;
-        document.getElementById('farmsCount').textContent = farms.length;
-        document.getElementById('milkTotal').textContent = `${milkTotal.toFixed(1)} L`;
-        document.getElementById('eventsCount').textContent = events.length;
-
-        renderAnimals(animals);
-        renderList('eventsList', events, 'tipo', (item) => `${item.fecha || '-'} / Proxima: ${item.proxima_fecha || '-'}`);
-        renderList('farmsList', farms, 'nombre', (item) => [item.municipio, item.departamento].filter(Boolean).join(', ') || 'Ubicacion no registrada');
-
+        renderAll();
         setStatus('ok', 'API conectada');
       } catch (error) {
         setStatus('fail', 'Sin conexion API');
-        document.getElementById('animalsBody').innerHTML = `<tr><td colspan="4">No se pudo conectar con ${state.apiBase}</td></tr>`;
-        document.getElementById('eventsList').innerHTML = '<div class="empty">Revisa que Django este corriendo en la red local.</div>';
-        document.getElementById('farmsList').innerHTML = '<div class="empty">Revisa la URL de la API.</div>';
+        ['dashboardAnimalsBody', 'animalsBody', 'productionBody', 'healthBody', 'financeBody'].forEach((id) => {
+          const target = document.getElementById(id);
+          if (target) target.innerHTML = `<tr><td colspan="8">No se pudo conectar con ${escapeHtml(state.apiBase)}: ${escapeHtml(error.message)}</td></tr>`;
+        });
       }
     }
+
+    async function handleForm(formId, path, messageId, successMessage) {
+      const form = document.getElementById(formId);
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = form.querySelector('button[type="submit"]');
+        button.disabled = true;
+        setMessage(messageId, 'Guardando...');
+        try {
+          await requestJson(path, {
+            method: 'POST',
+            body: JSON.stringify(compactPayload(form)),
+          });
+          form.reset();
+          setDefaultDates();
+          setMessage(messageId, successMessage, 'ok');
+          await loadData();
+        } catch (error) {
+          setMessage(messageId, error.message, 'error');
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    async function handleDelete(event) {
+      const button = event.target.closest('[data-delete]');
+      if (!button) return;
+      const path = button.dataset.delete;
+      button.disabled = true;
+      try {
+        await requestJson(path, { method: 'DELETE' });
+        await loadData();
+      } catch (error) {
+        alert(`No se pudo eliminar: ${error.message}`);
+        button.disabled = false;
+      }
+    }
+
+    function setModule(name) {
+      state.module = name;
+      document.querySelectorAll('.module').forEach((module) => module.classList.remove('active'));
+      document.getElementById(`module-${name}`).classList.add('active');
+      document.querySelectorAll('[data-module]').forEach((button) => {
+        button.classList.toggle('active', button.dataset.module === name);
+      });
+      const [title, subtitle] = moduleMeta[name];
+      document.getElementById('pageTitle').textContent = title;
+      document.getElementById('pageSubtitle').textContent = subtitle;
+    }
+
+    function setDefaultDates() {
+      ['productionDate', 'healthDate', 'financeDate'].forEach((id) => {
+        const input = document.getElementById(id);
+        if (input && !input.value) input.value = today();
+      });
+    }
+
+    document.body.addEventListener('click', (event) => {
+      const moduleButton = event.target.closest('[data-module]');
+      if (moduleButton) setModule(moduleButton.dataset.module);
+
+      const goto = event.target.closest('[data-goto]');
+      if (goto) setModule(goto.dataset.goto);
+
+      const profile = event.target.closest('[data-profile]');
+      if (profile) openAnimalProfile(profile.dataset.profile);
+
+      handleDelete(event);
+    });
+
+    document.getElementById('animalDrawer').addEventListener('click', (event) => {
+      if (event.target.id === 'animalDrawer') {
+        document.getElementById('animalDrawer').classList.remove('active');
+      }
+    });
+
+    document.getElementById('closeDrawer').addEventListener('click', () => {
+      document.getElementById('animalDrawer').classList.remove('active');
+    });
 
     document.getElementById('saveApi').addEventListener('click', () => {
       state.apiBase = apiInput.value.trim().replace(/\/$/, '');
       localStorage.setItem('mooLuckApiBase', state.apiBase);
-      loadDashboard();
+      loadData();
     });
 
-    document.getElementById('refresh').addEventListener('click', loadDashboard);
-    loadDashboard();
+    document.getElementById('refreshAll').addEventListener('click', loadData);
+
+    handleForm('animalForm', 'animales/', 'animalMessage', 'Animal guardado.');
+    handleForm('productionForm', 'producciones/', 'productionMessage', 'Produccion guardada.');
+    handleForm('healthForm', 'eventos-sanitarios/', 'healthMessage', 'Evento guardado.');
+    handleForm('financeForm', 'finanzas/transacciones/', 'financeMessage', 'Transaccion guardada.');
+    handleForm('categoryForm', 'finanzas/categorias/', 'categoryMessage', 'Categoria guardada.');
+
+    setDefaultDates();
+    loadData();
   </script>
 </body>
 </html>
