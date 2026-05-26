@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django.db.models import Sum
 from .models import Produccion
 from .serializers import ProduccionSerializer
+from apps.usuarios.permissions import ensure_owned_animal, is_admin, owned_farm_ids
 
 
 class ProduccionViewSet(viewsets.ModelViewSet):
@@ -19,6 +20,8 @@ class ProduccionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        if not is_admin(self.request.user):
+            qs = qs.filter(animal__finca_id__in=owned_farm_ids(self.request.user))
         animal_id = self.request.query_params.get('animal')
         fecha = self.request.query_params.get('fecha')
         fecha_desde = self.request.query_params.get('fecha_desde')
@@ -33,6 +36,10 @@ class ProduccionViewSet(viewsets.ModelViewSet):
         if fecha_hasta:
             qs = qs.filter(fecha__lte=fecha_hasta)
         return qs
+
+    def perform_create(self, serializer):
+        ensure_owned_animal(self.request.user, self.request.data.get('animal'))
+        serializer.save()
 
     @action(detail=False, methods=['get'])
     def resumen(self, request):

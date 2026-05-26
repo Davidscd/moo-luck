@@ -1167,6 +1167,7 @@
       apiBase: savedApiBase.replace(/\/$/, ''),
       module: 'dashboard',
       currentUser: JSON.parse(localStorage.getItem('mooLuckUser') || 'null'),
+      authToken: localStorage.getItem('mooLuckToken') || '',
       animals: [],
       farms: [],
       productions: [],
@@ -1186,6 +1187,10 @@
     };
 
     function showAuthenticatedApp() {
+      if (!state.currentUser || !state.authToken) {
+        showAuthScreen();
+        return;
+      }
       document.getElementById('authShell').classList.add('hidden');
       document.getElementById('appShell').classList.remove('hidden');
       document.querySelector('.bottom-nav').classList.remove('hidden');
@@ -1260,13 +1265,15 @@
     }
 
     async function requestJson(path, options = {}) {
+      const { skipAuth = false, ...fetchOptions } = options;
       const response = await fetch(endpoint(path), {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
-          ...(options.headers || {}),
+          ...(state.authToken && !skipAuth ? { Authorization: `Bearer ${state.authToken}` } : {}),
+          ...(fetchOptions.headers || {}),
         },
-        ...options,
+        ...fetchOptions,
       });
       if (!response.ok) {
         let detail = `${response.status} ${response.statusText}`;
@@ -1299,11 +1306,17 @@
 
       const user = await requestJson(mode === 'register' ? 'usuarios/' : 'usuarios/login/', {
         method: 'POST',
+        skipAuth: true,
         body: JSON.stringify(payload),
       });
 
       state.currentUser = user;
-      localStorage.setItem('mooLuckUser', JSON.stringify(user));
+      state.authToken = user.token;
+      const userProfile = { ...user };
+      delete userProfile.token;
+      localStorage.setItem('mooLuckUser', JSON.stringify(userProfile));
+      localStorage.setItem('mooLuckToken', state.authToken);
+      state.currentUser = userProfile;
       showAuthenticatedApp();
       await loadData();
     }
@@ -1622,7 +1635,7 @@
     }
 
     async function loadData() {
-      if (!state.currentUser) {
+      if (!state.currentUser || !state.authToken) {
         showAuthScreen();
         return;
       }
@@ -1631,7 +1644,7 @@
       try {
         const [animals, farms, productions, events, categories, transactions, balance] = await Promise.all([
           requestJson('animales/'),
-          requestJson(`fincas/?propietario=${state.currentUser.id}`),
+          requestJson('fincas/'),
           requestJson('producciones/'),
           requestJson('eventos-sanitarios/'),
           requestJson('finanzas/categorias/'),
@@ -1786,9 +1799,16 @@
       }
     });
 
-    document.getElementById('logoutButton').addEventListener('click', () => {
+    document.getElementById('logoutButton').addEventListener('click', async () => {
+      if (state.authToken) {
+        try {
+          await requestJson('usuarios/logout/', { method: 'POST' });
+        } catch (_) {}
+      }
       state.currentUser = null;
+      state.authToken = '';
       localStorage.removeItem('mooLuckUser');
+      localStorage.removeItem('mooLuckToken');
       showAuthScreen();
     });
 
@@ -1800,7 +1820,7 @@
     handleForm('categoryForm', 'finanzas/categorias/', 'categoryMessage', 'Categoria guardada.');
 
     setDefaultDates();
-    if (state.currentUser) {
+    if (state.currentUser && state.authToken) {
       showAuthenticatedApp();
       loadData();
     } else {

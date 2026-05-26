@@ -30,3 +30,27 @@ class Usuario(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.rol})"
+
+    @property
+    def is_authenticated(self):
+        return True
+
+
+class AuthToken(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='tokens',
+        db_column='usuario_id',
+    )
+    key_hash = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'auth_tokens'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Token de {self.usuario.email}"

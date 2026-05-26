@@ -17,7 +17,15 @@ El flujo esperado es:
 4. Registra produccion, eventos sanitarios y movimientos financieros.
 5. El dashboard calcula alertas y resumen operativo con los datos de esa cuenta.
 
-En esta fase el frontend guarda la sesion en `localStorage` y el backend expone un login simple en `/api/v1/usuarios/login/`. Para produccion real se debe reemplazar por autenticacion robusta con tokens, permisos y hash de password mas fuerte.
+El frontend guarda la sesion en `localStorage` y usa un token Bearer devuelto por `/api/v1/usuarios/login/`. El backend guarda los tokens hasheados y filtra fincas, animales, produccion, salud y finanzas por propietario autenticado.
+
+Ejemplo de consumo de API autenticada:
+
+```http
+Authorization: Bearer TU_TOKEN
+```
+
+Nota: para produccion real todavia conviene reemplazar el hash SHA-256 de password por el sistema nativo de Django o Argon2/bcrypt, agregar expiracion/rotacion de tokens y configurar permisos por rol con mas detalle.
 
 ## Ejecutar localmente
 

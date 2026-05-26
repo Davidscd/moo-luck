@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django.db.models import Sum
 from .models import CategoriaGasto, Transaccion
 from .serializers import CategoriaGastoSerializer, TransaccionSerializer
+from apps.usuarios.permissions import ensure_owned_farm, is_admin, owned_farm_ids
 
 
 class CategoriaGastoViewSet(viewsets.ModelViewSet):
@@ -28,6 +29,8 @@ class TransaccionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        if not is_admin(self.request.user):
+            qs = qs.filter(finca_id__in=owned_farm_ids(self.request.user))
         finca_id = self.request.query_params.get('finca')
         tipo = self.request.query_params.get('tipo')
         categoria_id = self.request.query_params.get('categoria')
@@ -45,6 +48,10 @@ class TransaccionViewSet(viewsets.ModelViewSet):
         if fecha_hasta:
             qs = qs.filter(fecha__lte=fecha_hasta)
         return qs
+
+    def perform_create(self, serializer):
+        ensure_owned_farm(self.request.user, self.request.data.get('finca'))
+        serializer.save()
 
     @action(detail=False, methods=['get'])
     def balance(self, request):

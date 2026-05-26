@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django.utils import timezone
 from .models import EventoSanitario
 from .serializers import EventoSanitarioSerializer
+from apps.usuarios.permissions import ensure_owned_animal, is_admin, owned_farm_ids
 
 
 class EventoSanitarioViewSet(viewsets.ModelViewSet):
@@ -20,6 +21,8 @@ class EventoSanitarioViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        if not is_admin(self.request.user):
+            qs = qs.filter(animal__finca_id__in=owned_farm_ids(self.request.user))
         animal_id = self.request.query_params.get('animal')
         tipo = self.request.query_params.get('tipo')
         veterinario_id = self.request.query_params.get('veterinario')
@@ -31,6 +34,10 @@ class EventoSanitarioViewSet(viewsets.ModelViewSet):
         if veterinario_id:
             qs = qs.filter(veterinario_id=veterinario_id)
         return qs
+
+    def perform_create(self, serializer):
+        ensure_owned_animal(self.request.user, self.request.data.get('animal'))
+        serializer.save()
 
     @action(detail=False, methods=['get'])
     def proximos(self, request):

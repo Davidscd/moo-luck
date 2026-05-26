@@ -1,7 +1,7 @@
 from rest_framework import viewsets, filters
-from django_filters.rest_framework import DjangoFilterBackend
 from .models import Animal
 from .serializers import AnimalSerializer, AnimalListSerializer
+from apps.usuarios.permissions import ensure_owned_farm, is_admin, owned_farm_ids
 
 
 class AnimalViewSet(viewsets.ModelViewSet):
@@ -22,6 +22,8 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        if not is_admin(self.request.user):
+            qs = qs.filter(finca_id__in=owned_farm_ids(self.request.user))
         # Filtros opcionales por query params
         finca_id = self.request.query_params.get('finca')
         estado = self.request.query_params.get('estado')
@@ -37,3 +39,7 @@ class AnimalViewSet(viewsets.ModelViewSet):
         if proposito:
             qs = qs.filter(proposito=proposito)
         return qs
+
+    def perform_create(self, serializer):
+        ensure_owned_farm(self.request.user, self.request.data.get('finca'))
+        serializer.save()
